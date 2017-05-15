@@ -22,7 +22,6 @@ package org.sputnikdev.bluetooth.cli.commands;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +36,8 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.shell.support.logging.HandlerUtils;
 import org.springframework.shell.support.util.OsUtils;
 import org.springframework.stereotype.Component;
-import org.sputnikdev.bluetooth.cli.BluetoothManagerCli;
 import org.sputnikdev.bluetooth.URL;
+import org.sputnikdev.bluetooth.cli.BluetoothManagerCli;
 import org.sputnikdev.bluetooth.manager.BluetoothGovernor;
 import org.sputnikdev.bluetooth.manager.BluetoothObjectType;
 import org.sputnikdev.bluetooth.manager.BluetoothSmartDeviceListener;
@@ -104,7 +103,7 @@ public class NotificationCommands implements CommandMarker {
                     listeners.remove(selectedURL);
                     if (selected instanceof DeviceGovernor) {
                         ((DeviceGovernor) selected).removeBluetoothSmartDeviceListener(listeners.get(selectedURL));
-                        ((DeviceGovernor) selected).removeGenericBluetoothDeviceListener();
+                        ((DeviceGovernor) selected).removeGenericBluetoothDeviceListener(listeners.get(selectedURL));
                         return "Notifications disabled: " + String.join(", ", DEVICE_NOTIFICATIONS);
                     } else if (selected instanceof CharacteristicGovernor) {
                         ((CharacteristicGovernor) selected).removeValueListener(listeners.get(selectedURL));
@@ -165,9 +164,6 @@ public class NotificationCommands implements CommandMarker {
                 lastRSSINotified = LocalDateTime.now();
             }
         }
-
-        @Override
-        public void lastUpdatedChanged(Date lastActivity) { }
 
         @Override
         public void connected() {

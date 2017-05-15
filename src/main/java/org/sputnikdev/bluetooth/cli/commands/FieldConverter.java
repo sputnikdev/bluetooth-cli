@@ -61,7 +61,7 @@ public class FieldConverter implements Converter<FieldHolder> {
 
         GattRequest gattRequest = parser.prepare(characteristicGovernor.getURL().getCharacteristicUUID());
 
-        for (FieldHolder fieldHolder : gattRequest.getFieldHolders()) {
+        for (FieldHolder fieldHolder : gattRequest.getAllFieldHolders()) {
             completions.add(new Completion(fieldHolder.getField().getName()));
         }
 

@@ -68,7 +68,7 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener {
     public BluetoothManagerCli() {
         bluetoothManager = BluetoothManagerFactory.getManager();
         bluetoothManager.addDiscoveryListener(this);
-        bluetoothManager.startDiscovery();
+        bluetoothManager.start(true);
 
         gattParser = BluetoothGattParserFactory.getDefault();
         String extensionFolder = System.getProperty("user.home") + File.separator + ".bluetooth_smart";
