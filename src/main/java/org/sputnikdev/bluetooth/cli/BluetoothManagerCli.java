@@ -33,28 +33,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.shell.Bootstrap;
 import org.springframework.shell.support.logging.HandlerUtils;
+import org.sputnikdev.bluetooth.URL;
 import org.sputnikdev.bluetooth.gattparser.BluetoothGattParser;
 import org.sputnikdev.bluetooth.gattparser.BluetoothGattParserFactory;
-import org.sputnikdev.bluetooth.URL;
+import org.sputnikdev.bluetooth.manager.AdapterDiscoveryListener;
 import org.sputnikdev.bluetooth.manager.AdapterGovernor;
 import org.sputnikdev.bluetooth.manager.BluetoothGovernor;
 import org.sputnikdev.bluetooth.manager.BluetoothManager;
 import org.sputnikdev.bluetooth.manager.CharacteristicGovernor;
 import org.sputnikdev.bluetooth.manager.DeviceDiscoveryListener;
 import org.sputnikdev.bluetooth.manager.DeviceGovernor;
+import org.sputnikdev.bluetooth.manager.DiscoveredAdapter;
 import org.sputnikdev.bluetooth.manager.DiscoveredDevice;
 import org.sputnikdev.bluetooth.manager.impl.BluetoothManagerFactory;
+import org.sputnikdev.bluetooth.manager.impl.BluetoothObjectFactory;
+import org.sputnikdev.bluetooth.manager.impl.TinyBFactory;
 
 /**
  *
  * @author Vlad Kolotov
  */
-public class BluetoothManagerCli implements DeviceDiscoveryListener {
+public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDiscoveryListener {
 
     protected final java.util.logging.Logger logger = HandlerUtils.getLogger(getClass());
 
@@ -66,8 +68,10 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener {
     private BluetoothGovernor selected;
 
     public BluetoothManagerCli() {
+        BluetoothObjectFactory.registerFactory(new TinyBFactory());
         bluetoothManager = BluetoothManagerFactory.getManager();
-        bluetoothManager.addDiscoveryListener(this);
+        bluetoothManager.addDeviceDiscoveryListener(this);
+        bluetoothManager.addAdapterDiscoveryListener(this);
         bluetoothManager.start(true);
 
         gattParser = BluetoothGattParserFactory.getDefault();
@@ -84,8 +88,18 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener {
     }
 
     @Override
-    public void lost(URL url) {
+    public void discovered(DiscoveredAdapter adapter) {
+        logger.info("Adapter discovered: " + adapter);
+    }
+
+    @Override
+    public void deviceLost(URL url) {
         logger.info("Device lost: " + url);
+    }
+
+    @Override
+    public void adapterLost(URL url) {
+        logger.info("Adapter lost: " + url);
     }
 
     public BluetoothManager getBluetoothManager() {
@@ -107,12 +121,12 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener {
         return instance;
     }
 
-    public Set<DiscoveredDevice> getDiscoveredDevices(boolean adapter) {
-        return FluentIterable.from(bluetoothManager.getDiscoveredDevices()).filter(new Predicate<DiscoveredDevice>() {
-            @Override public boolean apply(DiscoveredDevice discoveredDevice) {
-                return discoveredDevice.getURL().isAdapter() == adapter;
-            }
-        }).toSet();
+    public Set<DiscoveredDevice> getDiscoveredDevices() {
+        return bluetoothManager.getDiscoveredDevices();
+    }
+
+    public Set<DiscoveredAdapter> getDiscoveredAdapters() {
+        return bluetoothManager.getDiscoveredAdapters();
     }
 
     public BluetoothGovernor getSelected() {

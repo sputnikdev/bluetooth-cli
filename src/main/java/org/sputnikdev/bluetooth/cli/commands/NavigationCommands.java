@@ -55,7 +55,7 @@ public class NavigationCommands implements CommandMarker {
     @CliCommand(value = "ls", help = "Print available bluetooth objects (dependants)")
     public String ls() {
         if (BluetoothManagerCli.getInstance().getSelected() == null) {
-            return Joiner.on(OsUtils.LINE_SEPARATOR).join(BluetoothManagerCli.getInstance().getDiscoveredDevices(true));
+            return Joiner.on(OsUtils.LINE_SEPARATOR).join(BluetoothManagerCli.getInstance().getDiscoveredAdapters());
         } else {
             return Joiner.on(OsUtils.LINE_SEPARATOR).join(BluetoothManagerCli.getInstance().getSelectedDescendants());
         }

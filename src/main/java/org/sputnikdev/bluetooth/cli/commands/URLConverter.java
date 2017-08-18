@@ -29,12 +29,12 @@ import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.Converter;
 import org.springframework.shell.core.MethodTarget;
 import org.springframework.stereotype.Component;
-import org.sputnikdev.bluetooth.cli.BluetoothManagerCli;
 import org.sputnikdev.bluetooth.URL;
+import org.sputnikdev.bluetooth.cli.BluetoothManagerCli;
 import org.sputnikdev.bluetooth.manager.AdapterGovernor;
 import org.sputnikdev.bluetooth.manager.BluetoothGovernor;
 import org.sputnikdev.bluetooth.manager.DeviceGovernor;
-import org.sputnikdev.bluetooth.manager.DiscoveredDevice;
+import org.sputnikdev.bluetooth.manager.DiscoveredAdapter;
 
 /**
  *
@@ -76,8 +76,8 @@ public class URLConverter implements Converter<URL> {
 
     private List<Completion> getAdapters() {
         List<Completion> result = new ArrayList<>();
-        for (DiscoveredDevice device : BluetoothManagerCli.getInstance().getDiscoveredDevices(true)) {
-            result.add(new Completion(device.getURL().toString()));
+        for (DiscoveredAdapter adapter : BluetoothManagerCli.getInstance().getDiscoveredAdapters()) {
+            result.add(new Completion(adapter.getURL().toString()));
         }
         return result;
     }
