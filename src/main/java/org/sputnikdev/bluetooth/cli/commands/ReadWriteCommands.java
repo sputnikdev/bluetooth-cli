@@ -47,11 +47,14 @@ import org.sputnikdev.bluetooth.manager.CharacteristicGovernor;
 public class ReadWriteCommands implements CommandMarker {
 
     @Autowired
+    private BluetoothManagerCli bluetoothManagerCli;
+
+    @Autowired
     private InfoCommands infoCommands;
 
     @CliAvailabilityIndicator({"read"})
     public boolean isReadAvailable() {
-        BluetoothGovernor selected = BluetoothManagerCli.getInstance().getSelected();
+        BluetoothGovernor selected = bluetoothManagerCli.getSelected();
         if (selected != null && selected.getType() == BluetoothObjectType.CHARACTERISTIC && selected.isReady()) {
             CharacteristicGovernor characteristicGovernor = (CharacteristicGovernor) selected;
             return characteristicGovernor.isReadable();
@@ -61,7 +64,7 @@ public class ReadWriteCommands implements CommandMarker {
 
     @CliAvailabilityIndicator({"write"})
     public boolean isWriteAvailable() {
-        BluetoothGovernor selected = BluetoothManagerCli.getInstance().getSelected();
+        BluetoothGovernor selected = bluetoothManagerCli.getSelected();
         if (selected != null && selected.getType() == BluetoothObjectType.CHARACTERISTIC && selected.isReady()) {
             CharacteristicGovernor characteristicGovernor = (CharacteristicGovernor) selected;
             return characteristicGovernor.isWritable();
@@ -72,16 +75,16 @@ public class ReadWriteCommands implements CommandMarker {
     @CliCommand(value = "read", help = "Reads from selected characteristics")
     public String read() {
         CharacteristicGovernor characteristicGovernor =
-                (CharacteristicGovernor) BluetoothManagerCli.getInstance().getSelected();
+                (CharacteristicGovernor) bluetoothManagerCli.getSelected();
         return parse(characteristicGovernor.getURL(), characteristicGovernor.read());
     }
 
     @CliCommand(value = "write", help = "Writes to selected characteristics")
     public String write(@CliOption(key = {"fieldName"}, mandatory = true, help = "Field name") final FieldHolder holder,
             @CliOption(key = {"value"}, mandatory = true, help = "Field value") final String value) {
-        BluetoothGattParser parser = BluetoothManagerCli.getInstance().getGattParser();
+        BluetoothGattParser parser = bluetoothManagerCli.getGattParser();
         CharacteristicGovernor characteristicGovernor =
-                (CharacteristicGovernor) BluetoothManagerCli.getInstance().getSelected();
+                (CharacteristicGovernor) bluetoothManagerCli.getSelected();
 
         GattRequest gattRequest = parser.prepare(characteristicGovernor.getURL().getCharacteristicUUID());
 
@@ -95,7 +98,7 @@ public class ReadWriteCommands implements CommandMarker {
     String parse(URL url, byte[] raw) {
         StringBuilder builder = new StringBuilder();
 
-        BluetoothGattParser parser = BluetoothManagerCli.getInstance().getGattParser();
+        BluetoothGattParser parser = bluetoothManagerCli.getGattParser();
         String characteristicUUID = url.getCharacteristicUUID();
         if (parser.isKnownCharacteristic(url.getCharacteristicUUID())) {
             GattResponse gattResponse = parser.parse(characteristicUUID, raw);

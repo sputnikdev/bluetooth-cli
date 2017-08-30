@@ -20,6 +20,7 @@ package org.sputnikdev.bluetooth.cli.commands;
  * #L%
  */
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.shell.plugin.support.DefaultPromptProvider;
@@ -35,10 +36,12 @@ import org.sputnikdev.bluetooth.manager.BluetoothGovernor;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class PromptProvider extends DefaultPromptProvider {
 
+    @Autowired
+    private BluetoothManagerCli bluetoothManagerCli;
+
     @Override
     public String getPrompt() {
-        BluetoothManagerCli cli = BluetoothManagerCli.getInstance();
-        BluetoothGovernor selected = cli.getSelected();
+        BluetoothGovernor selected = bluetoothManagerCli.getSelected();
         if (selected == null || selected.getURL().isRoot()) {
             return "bt-mgr>";
         } else {

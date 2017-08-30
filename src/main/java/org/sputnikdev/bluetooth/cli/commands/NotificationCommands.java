@@ -60,6 +60,9 @@ public class NotificationCommands implements CommandMarker {
     protected final Logger logger = HandlerUtils.getLogger(getClass());
 
     @Autowired
+    private BluetoothManagerCli bluetoothManagerCli;
+
+    @Autowired
     private JLineShellComponent shell;
     @Autowired
     private ReadWriteCommands readWriteCommands;
@@ -68,7 +71,7 @@ public class NotificationCommands implements CommandMarker {
 
     @CliAvailabilityIndicator({"notification"})
     public boolean isNotificationAvailable() {
-        BluetoothGovernor selected = BluetoothManagerCli.getInstance().getSelected();
+        BluetoothGovernor selected = bluetoothManagerCli.getSelected();
         if (selected != null && selected.getType() == BluetoothObjectType.CHARACTERISTIC && selected.isReady()) {
             CharacteristicGovernor characteristicGovernor = (CharacteristicGovernor) selected;
             return characteristicGovernor.isNotifiable();
@@ -79,7 +82,7 @@ public class NotificationCommands implements CommandMarker {
     @CliCommand(value = "notification", help = "Enable/Disable notifications")
     public String notification(
             @CliOption(key = {""}, mandatory = true, help = "Enable/Disable notifications: on / off") final String command) {
-        BluetoothGovernor selected = BluetoothManagerCli.getInstance().getSelected();
+        BluetoothGovernor selected = bluetoothManagerCli.getSelected();
         URL selectedURL = selected.getURL();
         synchronized (listeners) {
             if ("on".equals(command)) {
@@ -117,7 +120,7 @@ public class NotificationCommands implements CommandMarker {
 
     private void checkConnected(URL deviceURL) {
         DeviceGovernor deviceGovernor =
-                BluetoothManagerCli.getInstance().getBluetoothManager().getDeviceGovernor(deviceURL);
+                bluetoothManagerCli.getBluetoothManager().getDeviceGovernor(deviceURL);
 
         if (!deviceGovernor.isReady()) {
             NotificationCommands.this.logger.info("Device is not ready!");

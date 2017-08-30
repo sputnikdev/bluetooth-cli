@@ -22,6 +22,7 @@ package org.sputnikdev.bluetooth.cli.commands;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.Converter;
 import org.springframework.shell.core.MethodTarget;
@@ -38,6 +39,10 @@ import org.sputnikdev.bluetooth.manager.CharacteristicGovernor;
  */
 @Component
 public class FieldConverter implements Converter<FieldHolder> {
+
+    @Autowired
+    private BluetoothManagerCli bluetoothManagerCli;
+
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return type.equals(FieldHolder.class);
@@ -45,9 +50,9 @@ public class FieldConverter implements Converter<FieldHolder> {
 
     @Override
     public FieldHolder convertFromText(String value, Class<?> targetType, String optionContext) {
-        BluetoothGattParser parser = BluetoothManagerCli.getInstance().getGattParser();
+        BluetoothGattParser parser = bluetoothManagerCli.getGattParser();
         CharacteristicGovernor characteristicGovernor =
-                (CharacteristicGovernor) BluetoothManagerCli.getInstance().getSelected();
+                (CharacteristicGovernor) bluetoothManagerCli.getSelected();
         GattRequest gattRequest = parser.prepare(characteristicGovernor.getURL().getCharacteristicUUID());
         return gattRequest.getFieldHolder(value);
     }
@@ -55,9 +60,9 @@ public class FieldConverter implements Converter<FieldHolder> {
     @Override
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType,
             String existingData, String optionContext, MethodTarget target) {
-        BluetoothGattParser parser = BluetoothManagerCli.getInstance().getGattParser();
+        BluetoothGattParser parser = bluetoothManagerCli.getGattParser();
         CharacteristicGovernor characteristicGovernor =
-                (CharacteristicGovernor) BluetoothManagerCli.getInstance().getSelected();
+                (CharacteristicGovernor) bluetoothManagerCli.getSelected();
 
         GattRequest gattRequest = parser.prepare(characteristicGovernor.getURL().getCharacteristicUUID());
 

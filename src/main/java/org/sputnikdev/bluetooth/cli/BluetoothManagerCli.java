@@ -36,6 +36,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.shell.Bootstrap;
 import org.springframework.shell.support.logging.HandlerUtils;
+import org.springframework.stereotype.Component;
 import org.sputnikdev.bluetooth.URL;
 import org.sputnikdev.bluetooth.gattparser.BluetoothGattParser;
 import org.sputnikdev.bluetooth.gattparser.BluetoothGattParserFactory;
@@ -52,10 +53,13 @@ import org.sputnikdev.bluetooth.manager.impl.BluetoothManagerFactory;
 import org.sputnikdev.bluetooth.manager.impl.BluetoothObjectFactoryProvider;
 import org.sputnikdev.bluetooth.manager.transport.tinyb.TinyBFactory;
 
+import javax.annotation.PreDestroy;
+
 /**
  *
  * @author Vlad Kolotov
  */
+@Component
 public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDiscoveryListener {
 
     protected final java.util.logging.Logger logger = HandlerUtils.getLogger(getClass());
@@ -80,6 +84,12 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
         if (extensionFolderFile.exists() && extensionFolderFile.isDirectory()) {
             gattParser.loadExtensionsFromFolder(extensionFolder);
         }
+    }
+
+    @PreDestroy
+    public void shutDown() {
+        logger.info("Shutting down / disposing Bluetooth Manager");
+        bluetoothManager.dispose();
     }
 
     @Override
@@ -150,16 +160,11 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
     }
 
     public static void main(String[] args) throws IOException {
-        ArrayList<String> argsList = new ArrayList<String>(Arrays.asList(args));
+        List<String> argsList = new ArrayList<>(Arrays.asList(args));
         argsList.add("--disableInternalCommands");
         String[] argsArray = new String[argsList.size()];
         argsArray = argsList.toArray(argsArray);
         Bootstrap.main(argsArray);
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override public void run() {
-                getInstance().getBluetoothManager().dispose();
-            }
-        });
     }
 
     public Class getSelectedGovernorInterface() {
@@ -177,7 +182,7 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
 
     public Map<String, PropertyDescriptor> getSelectedGovernorProperties(boolean writeOnly) {
         Map<String, PropertyDescriptor> properties = new HashMap<>();
-        Class selectedInterface = BluetoothManagerCli.getInstance().getSelectedGovernorInterface();
+        Class selectedInterface = getSelectedGovernorInterface();
         try {
             for (PropertyDescriptor propertyDescriptor :
                     Introspector.getBeanInfo(selectedInterface).getPropertyDescriptors()) {

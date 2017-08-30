@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.Converter;
 import org.springframework.shell.core.MethodTarget;
@@ -38,6 +39,10 @@ import org.sputnikdev.bluetooth.cli.BluetoothManagerCli;
  */
 @Component
 public class MethodConverter implements Converter<Method> {
+
+    @Autowired
+    private BluetoothManagerCli bluetoothManagerCli;
+
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return type.equals(Method.class);
@@ -47,7 +52,7 @@ public class MethodConverter implements Converter<Method> {
     public Method convertFromText(String value, Class<?> targetType, String optionContext) {
         String propertyName = StringUtils.uncapitalize(value.replaceAll("\\s",""));
         for (Map.Entry<String, PropertyDescriptor> property :
-                BluetoothManagerCli.getInstance().getSelectedGovernorProperties(true).entrySet()) {
+                bluetoothManagerCli.getSelectedGovernorProperties(true).entrySet()) {
             if (propertyName.equals(property.getValue().getDisplayName())) {
                 return property.getValue().getWriteMethod();
             }
@@ -59,7 +64,7 @@ public class MethodConverter implements Converter<Method> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType,
             String existingData, String optionContext, MethodTarget target) {
         for (Map.Entry<String, PropertyDescriptor> property :
-                BluetoothManagerCli.getInstance().getSelectedGovernorProperties(true).entrySet()) {
+                bluetoothManagerCli.getSelectedGovernorProperties(true).entrySet()) {
             completions.add(new Completion(property.getKey()));
         }
         return true;

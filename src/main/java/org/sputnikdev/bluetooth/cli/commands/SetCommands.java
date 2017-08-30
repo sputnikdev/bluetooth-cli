@@ -39,11 +39,14 @@ import org.sputnikdev.bluetooth.cli.BluetoothManagerCli;
 public class SetCommands implements CommandMarker {
 
     @Autowired
+    private BluetoothManagerCli bluetoothManagerCli;
+
+    @Autowired
     private InfoCommands infoCommands;
 
     @CliAvailabilityIndicator({"set"})
     public boolean isSetAvailable() {
-        return BluetoothManagerCli.getInstance().getSelected() != null;
+        return bluetoothManagerCli.getSelected() != null;
     }
 
     @CliCommand(value = "set", help = "Modifies an attribute of a bluetooth object")
@@ -51,13 +54,13 @@ public class SetCommands implements CommandMarker {
             @CliOption(key = {"value"}, mandatory = true, help = "Attribute value") final String value) {
 
         try {
-            method.invoke(BluetoothManagerCli.getInstance().getSelected(),
+            method.invoke(bluetoothManagerCli.getSelected(),
                     ConvertUtils.convert(value, method.getParameterTypes()[0]));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
 
-        return infoCommands.info(BluetoothManagerCli.getInstance().getSelected().getURL());
+        return infoCommands.info(bluetoothManagerCli.getSelected().getURL());
     }
 
 

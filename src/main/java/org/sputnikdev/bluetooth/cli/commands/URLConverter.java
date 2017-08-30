@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.Converter;
 import org.springframework.shell.core.MethodTarget;
@@ -42,6 +43,10 @@ import org.sputnikdev.bluetooth.manager.DiscoveredAdapter;
  */
 @Component
 public class URLConverter implements Converter<URL> {
+
+    @Autowired
+    private BluetoothManagerCli bluetoothManagerCli;
+
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return type.equals(URL.class);
@@ -49,8 +54,8 @@ public class URLConverter implements Converter<URL> {
 
     @Override
     public URL convertFromText(String value, Class<?> targetType, String optionContext) {
-        if ("../".equals(value) && BluetoothManagerCli.getInstance().getSelected() != null) {
-            URL selectedURL = BluetoothManagerCli.getInstance().getSelected().getURL();
+        if ("../".equals(value) && bluetoothManagerCli.getSelected() != null) {
+            URL selectedURL = bluetoothManagerCli.getSelected().getURL();
             if (selectedURL.isAdapter()) {
                 return new URL();
             }
@@ -63,7 +68,7 @@ public class URLConverter implements Converter<URL> {
     @Override
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType,
             String existingData, String optionContext, MethodTarget target) {
-        BluetoothGovernor selected = BluetoothManagerCli.getInstance().getSelected();
+        BluetoothGovernor selected = bluetoothManagerCli.getSelected();
         if (selected == null) {
             completions.addAll(getAdapters());
         } else if (selected instanceof AdapterGovernor) {
@@ -76,7 +81,7 @@ public class URLConverter implements Converter<URL> {
 
     private List<Completion> getAdapters() {
         List<Completion> result = new ArrayList<>();
-        for (DiscoveredAdapter adapter : BluetoothManagerCli.getInstance().getDiscoveredAdapters()) {
+        for (DiscoveredAdapter adapter : bluetoothManagerCli.getDiscoveredAdapters()) {
             result.add(new Completion(adapter.getURL().toString()));
         }
         return result;

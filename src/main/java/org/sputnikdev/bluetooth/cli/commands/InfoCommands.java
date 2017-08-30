@@ -24,6 +24,7 @@ import java.beans.PropertyDescriptor;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -51,6 +52,9 @@ public class InfoCommands implements CommandMarker {
     private static final String FORMAT_TWO_COLUMNS = "%-30s%-50s";
     private static final String FORMAT_THREE_COLUMNS = "%-15s%-30s%-30s";
 
+    @Autowired
+    private BluetoothManagerCli bluetoothManagerCli;
+
     @CliAvailabilityIndicator({"info"})
     public boolean isInfoAvailable() {
         return true;
@@ -58,12 +62,12 @@ public class InfoCommands implements CommandMarker {
 
     @CliAvailabilityIndicator({"pwd"})
     public boolean isPWDAvailable() {
-        return BluetoothManagerCli.getInstance().getSelected() != null;
+        return bluetoothManagerCli.getSelected() != null;
     }
 
     @CliCommand(value = "pwd", help = "Print details about selected bluetooth object")
     public String pwd() {
-        return info(BluetoothManagerCli.getInstance().getSelected().getURL());
+        return info(bluetoothManagerCli.getSelected().getURL());
     }
 
     @CliCommand(value = "info", help = "Print details about bluetooth object")
@@ -71,13 +75,13 @@ public class InfoCommands implements CommandMarker {
         URL objectURL = url;
 
         if (url == null || url.isRoot()) {
-            if (BluetoothManagerCli.getInstance().getSelected() != null) {
-                objectURL = BluetoothManagerCli.getInstance().getSelected().getURL();
+            if (bluetoothManagerCli.getSelected() != null) {
+                objectURL = bluetoothManagerCli.getSelected().getURL();
             } else {
                 return "Select a bluetooth object (see 'cd' command) or specify --url parameter";
             }
         }
-        return getBluetoothGovernorInfo(BluetoothManagerCli.getInstance().getBluetoothManager().getGovernor(objectURL));
+        return getBluetoothGovernorInfo(bluetoothManagerCli.getBluetoothManager().getGovernor(objectURL));
     }
 
     private void format(StringBuilder builder, String colum1, String column2) {
@@ -91,7 +95,7 @@ public class InfoCommands implements CommandMarker {
     private String getBluetoothGovernorInfo(BluetoothGovernor bluetoothGovernor) {
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<String, PropertyDescriptor> property :
-                BluetoothManagerCli.getInstance().getSelectedGovernorProperties(false).entrySet()) {
+                bluetoothManagerCli.getSelectedGovernorProperties(false).entrySet()) {
             try {
                 format(builder, property.getKey() + ":",
                         property.getValue().getReadMethod().invoke(bluetoothGovernor).toString());
@@ -138,7 +142,7 @@ public class InfoCommands implements CommandMarker {
     private void printServicesAndCharacteristics(StringBuilder builder, DeviceGovernor governor)
             throws NotReadyException {
         format(builder, "Services:", "");
-        BluetoothGattParser parser = BluetoothManagerCli.getInstance().getGattParser();
+        BluetoothGattParser parser = bluetoothManagerCli.getGattParser();
         Map<URL, List<CharacteristicGovernor>> services = governor.getServicesToCharacteristicsMap();
         for (Map.Entry<URL, List<CharacteristicGovernor>> service : services.entrySet()) {
             String serviceUUID = service.getKey().getServiceUUID();
@@ -150,7 +154,7 @@ public class InfoCommands implements CommandMarker {
     }
 
     private void printCharacteristics(StringBuilder builder, List<CharacteristicGovernor> characteristics) {
-        BluetoothGattParser parser = BluetoothManagerCli.getInstance().getGattParser();
+        BluetoothGattParser parser = bluetoothManagerCli.getGattParser();
         format(builder, "", "Characteristics:");
         for (CharacteristicGovernor characteristic : characteristics) {
             String characteristicUUID = characteristic.getURL().getCharacteristicUUID();
@@ -162,7 +166,7 @@ public class InfoCommands implements CommandMarker {
     }
 
     private void printCharacteristic(StringBuilder builder, CharacteristicGovernor governor) throws NotReadyException {
-        BluetoothGattParser parser = BluetoothManagerCli.getInstance().getGattParser();
+        BluetoothGattParser parser = bluetoothManagerCli.getGattParser();
         String characteristicUUID = governor.getURL().getCharacteristicUUID();
         format(builder, "Name:", parser.isKnownCharacteristic(characteristicUUID) ?
                 parser.getCharacteristic(characteristicUUID).getName() : "Unrecognised");

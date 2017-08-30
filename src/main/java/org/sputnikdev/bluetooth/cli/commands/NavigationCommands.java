@@ -40,6 +40,9 @@ import org.sputnikdev.bluetooth.manager.BluetoothGovernor;
 public class NavigationCommands implements CommandMarker {
 
     @Autowired
+    private BluetoothManagerCli bluetoothManagerCli;
+
+    @Autowired
     private InfoCommands infoCommands;
 
     @CliAvailabilityIndicator({"cd"})
@@ -54,10 +57,10 @@ public class NavigationCommands implements CommandMarker {
 
     @CliCommand(value = "ls", help = "Print available bluetooth objects (dependants)")
     public String ls() {
-        if (BluetoothManagerCli.getInstance().getSelected() == null) {
-            return Joiner.on(OsUtils.LINE_SEPARATOR).join(BluetoothManagerCli.getInstance().getDiscoveredAdapters());
+        if (bluetoothManagerCli.getSelected() == null) {
+            return Joiner.on(OsUtils.LINE_SEPARATOR).join(bluetoothManagerCli.getDiscoveredAdapters());
         } else {
-            return Joiner.on(OsUtils.LINE_SEPARATOR).join(BluetoothManagerCli.getInstance().getSelectedDescendants());
+            return Joiner.on(OsUtils.LINE_SEPARATOR).join(bluetoothManagerCli.getSelectedDescendants());
         }
     }
 
@@ -68,9 +71,9 @@ public class NavigationCommands implements CommandMarker {
         if (url.isRoot()) {
             selected = null;
         } else {
-            selected = BluetoothManagerCli.getInstance().getBluetoothManager().getGovernor(url);
+            selected = bluetoothManagerCli.getBluetoothManager().getGovernor(url);
         }
-        BluetoothManagerCli.getInstance().setSelected(selected);
+        bluetoothManagerCli.setSelected(selected);
         return infoCommands.info(url);
     }
 
