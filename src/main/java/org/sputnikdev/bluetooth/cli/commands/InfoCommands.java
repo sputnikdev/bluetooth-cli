@@ -98,7 +98,7 @@ public class InfoCommands implements CommandMarker {
                 bluetoothManagerCli.getSelectedGovernorProperties(false).entrySet()) {
             try {
                 format(builder, property.getKey() + ":",
-                        property.getValue().getReadMethod().invoke(bluetoothGovernor).toString());
+                        String.valueOf(property.getValue().getReadMethod().invoke(bluetoothGovernor)));
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }

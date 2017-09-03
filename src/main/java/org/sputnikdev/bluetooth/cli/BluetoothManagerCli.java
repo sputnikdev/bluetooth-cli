@@ -51,6 +51,7 @@ import org.sputnikdev.bluetooth.manager.DiscoveredAdapter;
 import org.sputnikdev.bluetooth.manager.DiscoveredDevice;
 import org.sputnikdev.bluetooth.manager.impl.BluetoothManagerFactory;
 import org.sputnikdev.bluetooth.manager.impl.BluetoothObjectFactoryProvider;
+import org.sputnikdev.bluetooth.manager.transport.bluegiga.BluegigaFactory;
 import org.sputnikdev.bluetooth.manager.transport.tinyb.TinyBFactory;
 
 import javax.annotation.PreDestroy;
@@ -72,7 +73,8 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
     private BluetoothGovernor selected;
 
     public BluetoothManagerCli() {
-        BluetoothObjectFactoryProvider.registerFactory(new TinyBFactory());
+        //BluetoothObjectFactoryProvider.registerFactory(new TinyBFactory());
+        BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory(Arrays.asList("/dev/tty.usbmodem1")));
         bluetoothManager = BluetoothManagerFactory.getManager();
         bluetoothManager.addDeviceDiscoveryListener(this);
         bluetoothManager.addAdapterDiscoveryListener(this);
