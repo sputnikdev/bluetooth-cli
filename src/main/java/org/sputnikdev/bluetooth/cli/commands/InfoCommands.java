@@ -20,10 +20,6 @@ package org.sputnikdev.bluetooth.cli.commands;
  * #L%
  */
 
-import java.beans.PropertyDescriptor;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -31,16 +27,16 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.shell.support.util.OsUtils;
 import org.springframework.stereotype.Component;
+import org.sputnikdev.bluetooth.URL;
 import org.sputnikdev.bluetooth.cli.BluetoothManagerCli;
 import org.sputnikdev.bluetooth.gattparser.BluetoothGattParser;
-import org.sputnikdev.bluetooth.URL;
 import org.sputnikdev.bluetooth.gattparser.spec.Field;
-import org.sputnikdev.bluetooth.manager.AdapterGovernor;
-import org.sputnikdev.bluetooth.manager.BluetoothGovernor;
-import org.sputnikdev.bluetooth.manager.BluetoothObjectVisitor;
-import org.sputnikdev.bluetooth.manager.CharacteristicGovernor;
-import org.sputnikdev.bluetooth.manager.DeviceGovernor;
-import org.sputnikdev.bluetooth.manager.NotReadyException;
+import org.sputnikdev.bluetooth.manager.*;
+
+import java.beans.PropertyDescriptor;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -161,7 +157,7 @@ public class InfoCommands implements CommandMarker {
             String characteristicName = parser.isKnownCharacteristic(characteristicUUID) ?
                     parser.getCharacteristic(characteristicUUID).getName() : "Unrecognised";
             format(builder, "", "", characteristicUUID + " [" + characteristicName + "] [" +
-                    String.join(", ", characteristic.getFlags()) + "]");
+                    characteristic.getFlags().stream().map(Enum::toString).collect(Collectors.joining(", ")) + "]");
         }
     }
 
@@ -170,7 +166,8 @@ public class InfoCommands implements CommandMarker {
         String characteristicUUID = governor.getURL().getCharacteristicUUID();
         format(builder, "Name:", parser.isKnownCharacteristic(characteristicUUID) ?
                 parser.getCharacteristic(characteristicUUID).getName() : "Unrecognised");
-        format(builder, "Flags:", governor.isReady() ? String.join(", ", governor.getFlags()) : "Not ready");
+        format(builder, "Flags:", governor.isReady() ?
+                governor.getFlags().stream().map(Enum::toString).collect(Collectors.joining(", ")) : "Not ready");
         if (parser.isKnownCharacteristic(governor.getURL().getCharacteristicUUID())) {
             format(builder, "Fields:", "");
             List<Field> fields = parser.getFields(governor.getURL().getCharacteristicUUID());

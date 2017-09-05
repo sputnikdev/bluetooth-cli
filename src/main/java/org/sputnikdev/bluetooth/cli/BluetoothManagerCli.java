@@ -20,19 +20,6 @@ package org.sputnikdev.bluetooth.cli;
  * #L%
  */
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.shell.Bootstrap;
 import org.springframework.shell.support.logging.HandlerUtils;
@@ -40,21 +27,18 @@ import org.springframework.stereotype.Component;
 import org.sputnikdev.bluetooth.URL;
 import org.sputnikdev.bluetooth.gattparser.BluetoothGattParser;
 import org.sputnikdev.bluetooth.gattparser.BluetoothGattParserFactory;
-import org.sputnikdev.bluetooth.manager.AdapterDiscoveryListener;
-import org.sputnikdev.bluetooth.manager.AdapterGovernor;
-import org.sputnikdev.bluetooth.manager.BluetoothGovernor;
-import org.sputnikdev.bluetooth.manager.BluetoothManager;
-import org.sputnikdev.bluetooth.manager.CharacteristicGovernor;
-import org.sputnikdev.bluetooth.manager.DeviceDiscoveryListener;
-import org.sputnikdev.bluetooth.manager.DeviceGovernor;
-import org.sputnikdev.bluetooth.manager.DiscoveredAdapter;
-import org.sputnikdev.bluetooth.manager.DiscoveredDevice;
+import org.sputnikdev.bluetooth.manager.*;
 import org.sputnikdev.bluetooth.manager.impl.BluetoothManagerFactory;
 import org.sputnikdev.bluetooth.manager.impl.BluetoothObjectFactoryProvider;
-import org.sputnikdev.bluetooth.manager.transport.bluegiga.BluegigaFactory;
 import org.sputnikdev.bluetooth.manager.transport.tinyb.TinyBFactory;
 
 import javax.annotation.PreDestroy;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 /**
  *
@@ -73,8 +57,8 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
     private BluetoothGovernor selected;
 
     public BluetoothManagerCli() {
-        //BluetoothObjectFactoryProvider.registerFactory(new TinyBFactory());
-        BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory(Arrays.asList("/dev/tty.usbmodem1")));
+        BluetoothObjectFactoryProvider.registerFactory(new TinyBFactory());
+        //BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory(Arrays.asList("/dev/tty.usbmodem1")));
         bluetoothManager = BluetoothManagerFactory.getManager();
         bluetoothManager.addDeviceDiscoveryListener(this);
         bluetoothManager.addAdapterDiscoveryListener(this);
