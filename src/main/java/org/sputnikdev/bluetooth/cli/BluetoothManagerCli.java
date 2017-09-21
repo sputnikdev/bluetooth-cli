@@ -27,9 +27,18 @@ import org.springframework.stereotype.Component;
 import org.sputnikdev.bluetooth.URL;
 import org.sputnikdev.bluetooth.gattparser.BluetoothGattParser;
 import org.sputnikdev.bluetooth.gattparser.BluetoothGattParserFactory;
-import org.sputnikdev.bluetooth.manager.*;
+import org.sputnikdev.bluetooth.manager.AdapterDiscoveryListener;
+import org.sputnikdev.bluetooth.manager.AdapterGovernor;
+import org.sputnikdev.bluetooth.manager.BluetoothGovernor;
+import org.sputnikdev.bluetooth.manager.BluetoothManager;
+import org.sputnikdev.bluetooth.manager.CharacteristicGovernor;
+import org.sputnikdev.bluetooth.manager.DeviceDiscoveryListener;
+import org.sputnikdev.bluetooth.manager.DeviceGovernor;
+import org.sputnikdev.bluetooth.manager.DiscoveredAdapter;
+import org.sputnikdev.bluetooth.manager.DiscoveredDevice;
 import org.sputnikdev.bluetooth.manager.impl.BluetoothManagerFactory;
 import org.sputnikdev.bluetooth.manager.impl.BluetoothObjectFactoryProvider;
+import org.sputnikdev.bluetooth.manager.transport.bluegiga.BluegigaFactory;
 import org.sputnikdev.bluetooth.manager.transport.tinyb.TinyBFactory;
 
 import javax.annotation.PreDestroy;
@@ -38,7 +47,13 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -57,8 +72,7 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
     private BluetoothGovernor selected;
 
     public BluetoothManagerCli() {
-        BluetoothObjectFactoryProvider.registerFactory(new TinyBFactory());
-        //BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory(Arrays.asList("/dev/tty.usbmodem1")));
+        registerTransports();
         bluetoothManager = BluetoothManagerFactory.getManager();
         bluetoothManager.addDeviceDiscoveryListener(this);
         bluetoothManager.addAdapterDiscoveryListener(this);
@@ -189,6 +203,22 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
             }
         } catch (IntrospectionException e) { }
         return properties;
+    }
+
+    private void registerTransports() {
+        try {
+            System.loadLibrary("javatinyb");
+            BluetoothObjectFactoryProvider.registerFactory(new TinyBFactory());
+        } catch (UnsatisfiedLinkError err) {
+            logger.warning("Could not load tinyb library. TinyB transport is not registered.");
+        }
+
+        try {
+            System.loadLibrary("rxtxSerial");
+            BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory(Arrays.asList("/dev/tty.usbmodem1")));
+        } catch (UnsatisfiedLinkError err) {
+            logger.warning("Could not load bluegiga library. Bluegiga transport is not registered.");
+        }
     }
 
 }
