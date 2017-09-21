@@ -215,7 +215,9 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
 
         try {
             System.loadLibrary("rxtxSerial");
-            BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory(Arrays.asList("/dev/tty.usbmodem1")));
+            //BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory(Arrays.asList("/dev/tty.usbmodem1")));
+            // automatic discovery of all serial ports
+            BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory());
         } catch (UnsatisfiedLinkError err) {
             logger.warning("Could not load bluegiga library. Bluegiga transport is not registered.");
         }

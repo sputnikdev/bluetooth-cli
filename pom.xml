@@ -146,16 +146,6 @@
 
     <repositories>
         <repository>
-            <id>opennms-repo</id>
-            <name>OpenNMS Maven Repository</name>
-            <url>http://repo.opennms.org/maven2</url>
-        </repository>
-        <repository>
-            <id>opennms-snapshots</id>
-            <name>OpenNMS Snapshot Maven Repository</name>
-            <url>http://repo.opennms.org/snapshots</url>
-        </repository>
-        <repository>
             <id>sonatype-snapshots</id>
             <name>Sonatype Snapshots Maven Repository</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -187,11 +177,6 @@
             <groupId>com.zsmartsystems.bluetooth.bluegiga</groupId>
             <artifactId>com.zsmartsystems.bluetooth.bluegiga</artifactId>
             <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.rxtx</groupId>
-            <artifactId>rxtx</artifactId>
-            <version>2.2pre2</version>
         </dependency>
         <dependency>
             <groupId>org.sputnikdev</groupId>
