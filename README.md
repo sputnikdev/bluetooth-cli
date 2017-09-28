@@ -1,7 +1,22 @@
 # bluetooth-cli
 
-A test application for the Bluetooth Manager. It is not by any means production-ready application. 
+A test application for the Bluetooth Manager. It is not by any means a production-ready application. 
 The main purpose of this application is to provide easy-to-use testing platform for the Bluetooth Manager.
+
+## Build and run the application:
+
+1. Install dependecies (Bluegiga):
+```sh
+sh .travis/install-dependencies.sh
+```
+2. Build the project with maven:
+```bash
+mvn clean install
+```
+3. Run the application:
+```bash
+java -jar bluetooth-cli-1.0-SNAPSHOT.jar
+```
 
 ---
 ## Contribution
