@@ -206,11 +206,10 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
     }
 
     private void registerTransports() {
-        try {
-            if (TinyBFactory.loadNativeLibraries()) {
-                BluetoothObjectFactoryProvider.registerFactory(new TinyBFactory());
-            }
-        } catch (UnsatisfiedLinkError err) {
+
+        if (TinyBFactory.loadNativeLibraries()) {
+            BluetoothObjectFactoryProvider.registerFactory(new TinyBFactory());
+        } else {
             logger.warning("Could not load tinyb library. TinyB transport is not registered.");
         }
 
@@ -219,7 +218,7 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
             //BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory(Arrays.asList("/dev/tty.usbmodem1")));
             // automatic discovery of all serial ports
             BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory());
-        } catch (UnsatisfiedLinkError err) {
+        } catch (UnsatisfiedLinkError ignore) {
             logger.warning("Could not load bluegiga library. Bluegiga transport is not registered.");
         }
     }

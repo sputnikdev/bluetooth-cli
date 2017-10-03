@@ -1,6 +1,6 @@
 # bluetooth-cli
 
-A test application for the Bluetooth Manager. It is not by any means a production-ready application. 
+A test application for the [Bluetooth Manager](https://github.com/sputnikdev/bluetooth-manager). It is not by any means a production-ready application. 
 The main purpose of this application is to provide easy-to-use testing platform for the Bluetooth Manager.
 
 ## Build and run the application:
