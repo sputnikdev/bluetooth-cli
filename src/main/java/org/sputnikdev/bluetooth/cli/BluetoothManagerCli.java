@@ -207,8 +207,9 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
 
     private void registerTransports() {
         try {
-            System.loadLibrary("javatinyb");
-            BluetoothObjectFactoryProvider.registerFactory(new TinyBFactory());
+            if (TinyBFactory.loadNativeLibraries()) {
+                BluetoothObjectFactoryProvider.registerFactory(new TinyBFactory());
+            }
         } catch (UnsatisfiedLinkError err) {
             logger.warning("Could not load tinyb library. TinyB transport is not registered.");
         }
