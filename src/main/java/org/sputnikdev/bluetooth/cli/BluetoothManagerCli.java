@@ -20,6 +20,8 @@ package org.sputnikdev.bluetooth.cli;
  * #L%
  */
 
+import gnu.io.NativeResourceException;
+import gnu.io.SerialManager;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.shell.Bootstrap;
 import org.springframework.shell.support.logging.HandlerUtils;
@@ -214,12 +216,10 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
         }
 
         try {
-            System.loadLibrary("rxtxSerial");
-            //BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory(Arrays.asList("/dev/tty.usbmodem1")));
-            // automatic discovery of all serial ports
+            SerialManager.getInstance();
             BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory());
-        } catch (UnsatisfiedLinkError ignore) {
-            logger.warning("Could not load bluegiga library. Bluegiga transport is not registered.");
+        } catch (NativeResourceException ex) {
+            logger.warning("Could not load bluegiga library. Bluegiga transport is not registered: " + ex.getMessage());
         }
     }
 
