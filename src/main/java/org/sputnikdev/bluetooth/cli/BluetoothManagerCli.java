@@ -38,8 +38,8 @@ import org.sputnikdev.bluetooth.manager.DeviceDiscoveryListener;
 import org.sputnikdev.bluetooth.manager.DeviceGovernor;
 import org.sputnikdev.bluetooth.manager.DiscoveredAdapter;
 import org.sputnikdev.bluetooth.manager.DiscoveredDevice;
-import org.sputnikdev.bluetooth.manager.impl.BluetoothManagerFactory;
-import org.sputnikdev.bluetooth.manager.impl.BluetoothObjectFactoryProvider;
+
+import org.sputnikdev.bluetooth.manager.impl.BluetoothManagerBuilder;
 import org.sputnikdev.bluetooth.manager.transport.bluegiga.BluegigaFactory;
 import org.sputnikdev.bluetooth.manager.transport.tinyb.TinyBFactory;
 
@@ -75,7 +75,7 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
 
     public BluetoothManagerCli() {
         registerTransports();
-        bluetoothManager = BluetoothManagerFactory.getManager();
+        bluetoothManager = new BluetoothManagerBuilder().build();
         bluetoothManager.addDeviceDiscoveryListener(this);
         bluetoothManager.addAdapterDiscoveryListener(this);
         bluetoothManager.start(true);
@@ -210,14 +210,14 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
     private void registerTransports() {
 
         if (TinyBFactory.loadNativeLibraries()) {
-            BluetoothObjectFactoryProvider.registerFactory(new TinyBFactory());
+            bluetoothManager.registerFactory(new TinyBFactory());
         } else {
             logger.warning("Could not load tinyb library. TinyB transport is not registered.");
         }
 
         try {
             SerialManager.getInstance();
-            BluetoothObjectFactoryProvider.registerFactory(new BluegigaFactory());
+            bluetoothManager.registerFactory(new BluegigaFactory());
         } catch (NativeResourceException ex) {
             logger.warning("Could not load bluegiga library. Bluegiga transport is not registered: " + ex.getMessage());
         }
