@@ -26,6 +26,8 @@ public final class HeartRateMonitor {
             .withTinyBTransport(true)
             .withBlueGigaTransport("^*.$")
             .withIgnoreTransportInitErrors(true)
+            .withDiscovering(true)
+            .withRediscover(true)
             .build();
     private final BluetoothGattParser gattParser = BluetoothGattParserFactory.getDefault();
 
@@ -53,7 +55,7 @@ public final class HeartRateMonitor {
     private void run() throws InterruptedException {
         batteryLevel.addValueListener(this::printBatteryLevel);
         heartRate.addValueListener(this::printHeartRate);
-        printBatteryLevel(batteryLevel.read());
+        //printBatteryLevel(batteryLevel.read());
         Thread.currentThread().join();
     }
 
