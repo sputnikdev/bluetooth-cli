@@ -49,7 +49,7 @@ import java.util.Random;
  * <br>read	    0x0038 -> 63 27 33 2E 31 2E 38         00001a02-0000-1000-8000-00805f9b34fb
  * <br>write	0x0036 -> 01 00 			- enable notif for data
  * <br>write	0x0033 -> A0 1F 			- magic number again
- * <br>notify   0x0035 -> 0C 01 00 2B 01 00 00 00 00 00 02 3C 00 FB 34 9B - data
+ * <br>notify   0x0035 0C 01 00 2B 01 00 00 00 00 00 02 3C 00 FB 34 9B - data
  * <br>notify   0x0021 00 					- ??? 00001001-0000-1000-8000-00805f9b34fb
  * <br>notify   0x0035 ...
  * <br>notify   0x0035 ...
@@ -107,7 +107,7 @@ public final class MiFloraSensorWithMiProtocol {
 
     private int authenticationStepNumber = 0;
 
-    final ValueListener valueListener = new ValueListener() {
+    private final ValueListener valueListener = new ValueListener() {
         @Override
         public void changed(byte[] value) {
             authenticationStepNumber++;
@@ -161,7 +161,6 @@ public final class MiFloraSensorWithMiProtocol {
 
             }
         });
-        Thread.sleep(15000);
         bluetoothManager.getDeviceGovernor(url).setConnectionControl(true);
     }
 

@@ -40,7 +40,9 @@ final class Utils {
                                     field.getFormat().getName(), flags, holder.getString()));
                         });
                     } else {
-                        System.out.println(String.format("%s / %s: %s", serviceName, characteristic.getURL().getCharacteristicUUID(),
+                        System.out.println(String.format("%s / %s (%s): %s", serviceName,
+                                characteristic.getURL().getCharacteristicUUID(),
+                                flags,
                                 formatHex(tryToRead(bluetoothManager.getCharacteristicGovernor(characteristic.getURL())))));
                     }
                 } else {
@@ -72,7 +74,7 @@ final class Utils {
         try {
             return governor.read();
         } catch (Throwable ex) {
-            System.out.println("Could not read char: " + ex.getMessage());
+            System.out.println("Could not read characteristic: " + ex.getMessage());
             return new byte[]{ };
         }
     }
