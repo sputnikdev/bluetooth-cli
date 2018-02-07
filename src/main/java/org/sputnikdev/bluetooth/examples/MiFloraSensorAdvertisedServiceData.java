@@ -54,9 +54,9 @@ public final class MiFloraSensorAdvertisedServiceData {
             public void servicesResolved(List<GattService> gattServices) {  }
 
             @Override
-            public void serviceDataChanged(Map<String, byte[]> serviceData) {
+            public void serviceDataChanged(Map<URL, byte[]> serviceData) {
                 serviceData.forEach((key, value) -> {
-                    GattResponse response = gattParser.parse(key, value);
+                    GattResponse response = gattParser.parse(key.getServiceUUID(), value);
                     response.getFieldHolders().stream()
                             .filter(holder -> !holder.getField().isUnknown())
                             .forEach(holder -> {

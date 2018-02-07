@@ -5,9 +5,13 @@ import org.sputnikdev.bluetooth.gattparser.BluetoothGattParser;
 import org.sputnikdev.bluetooth.gattparser.BluetoothGattParserFactory;
 import org.sputnikdev.bluetooth.gattparser.GattResponse;
 import org.sputnikdev.bluetooth.manager.BluetoothManager;
+import org.sputnikdev.bluetooth.manager.BluetoothSmartDeviceListener;
 import org.sputnikdev.bluetooth.manager.CharacteristicGovernor;
+import org.sputnikdev.bluetooth.manager.GattService;
 import org.sputnikdev.bluetooth.manager.impl.BluetoothManagerBuilder;
 
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,11 +71,32 @@ public final class MiTemperatureAndHumiditySensor {
                 System.out.println(String.format("Humidity: %s %%", matcher.group("humidity")));
             }
         });
-        bluetoothManager.getDeviceGovernor(url).addBluetoothSmartDeviceListener(services -> {
-            System.out.println(String.format("Battery level: %d %%",
-                    gattParser.parse(BATTERY_LEVEL_CHAR, battery.read()).get("Level").getInteger()));
+        bluetoothManager.getDeviceGovernor(url).addBluetoothSmartDeviceListener(new BluetoothSmartDeviceListener() {
+            @Override
+            public void servicesResolved(List<GattService> gattServices) {
+                System.out.println(String.format("Battery level: %d %%",
+                        gattParser.parse(BATTERY_LEVEL_CHAR, battery.read()).get("Level").getInteger()));
+            }
+
+            @Override
+            public void serviceDataChanged(Map<URL, byte[]> serviceData) {
+                serviceData.forEach((url, data) -> {
+                    GattResponse response = gattParser.parse(url.getServiceUUID(), data);
+                    response.getFieldHolders().stream()
+                            .filter(holder -> !holder.getField().isUnknown())
+                            .forEach(holder -> {
+                                System.out.println(holder.getField().getName() + ": " + holder);
+                            });
+                });
+            }
+
+            @Override
+            public void manufacturerDataChanged(Map<Short, byte[]> manufacturerData) {
+                manufacturerData.forEach((key, value) -> System.out.println(String.format("Manufacturer data (%s): %s",
+                        key, Utils.formatHex(value))));
+            }
         });
-        bluetoothManager.getDeviceGovernor(url).setConnectionControl(true);
+        //bluetoothManager.getDeviceGovernor(url).setConnectionControl(false);
     }
 
     private void run() throws InterruptedException {
