@@ -8,6 +8,8 @@ import org.sputnikdev.bluetooth.manager.BluetoothManager;
 import org.sputnikdev.bluetooth.manager.CharacteristicGovernor;
 import org.sputnikdev.bluetooth.manager.impl.BluetoothManagerBuilder;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * A test application to display readings from the MiFlora sensor.
  *
@@ -34,10 +36,7 @@ public final class MiFloraSensor {
             .withRediscover(true)
             .build();
     private final BluetoothGattParser gattParser = BluetoothGattParserFactory.getDefault();
-    private CharacteristicGovernor magicNumber;
-    private CharacteristicGovernor batteryFirmware;
-    private CharacteristicGovernor data;
-
+    private final URL url;
 
     /**
      * An entry point for the application.
@@ -47,36 +46,48 @@ public final class MiFloraSensor {
      * <br>E.g.: /88:6B:0F:30:63:AD/C4:7C:8D:66:07:4B
      * @param args a single argument in the following format: /XX:XX:XX:XX:XX:XX/YY:YY:YY:YY:YY:YY
      */
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
         new MiFloraSensor(new URL(args[0])).run();
     }
 
     private MiFloraSensor(URL url) {
+        this.url = url;
+    }
+
+    private boolean authenticate(CharacteristicGovernor governor) {
+        return governor.write(MAGIC_NUMBER);
+    }
+
+    private void printBatteryLevel(byte[] data) {
+        GattResponse batteryFirmwareResponse = gattParser.parse(BATTERY_FIRMWARE_CHAR, data);
+        System.out.println(String.format("Battery level: %s %%", batteryFirmwareResponse.get("Battery level").getInteger()));
+        System.out.println("Firmware version: " + batteryFirmwareResponse.get("Firmware version").getString());
+    }
+
+    private void printReadings(byte[] data) {
+        GattResponse dataResponse = gattParser.parse(DATA_CHAR, data);
+        System.out.println(String.format("Temperature: %.1f °C", dataResponse.get("Temperature").getDouble()));
+        System.out.println(String.format("Sunlight: %d lux", dataResponse.get("Sunlight").getInteger()));
+        System.out.println(String.format("Moisture: %d %%", dataResponse.get("Moisture").getInteger()));
+        System.out.println(String.format("Fertility: %d µS/cm", dataResponse.get("Fertility").getInteger()));
+    }
+
+    private void run() throws InterruptedException, ExecutionException {
+        bluetoothManager.getDeviceGovernor(url).setConnectionControl(true);
         bluetoothManager.addDeviceDiscoveryListener(discoveredDevice -> {
             System.out.println(String.format("Discovered: %s [%s]", discoveredDevice.getName(),
                     discoveredDevice.getURL().getDeviceAddress()));
         });
-        magicNumber = bluetoothManager.getCharacteristicGovernor(url.copyWith(DATA_SERVICE, MAGIC_NUMBER_CHAR));
-        batteryFirmware = bluetoothManager.getCharacteristicGovernor(url.copyWith(DATA_SERVICE, BATTERY_FIRMWARE_CHAR));
-        data = bluetoothManager.getCharacteristicGovernor(url.copyWith(DATA_SERVICE, DATA_CHAR));
-        bluetoothManager.getDeviceGovernor(url).addBluetoothSmartDeviceListener(
-                gattServices -> {
-                    magicNumber.write(MAGIC_NUMBER);
-                    GattResponse batteryFirmwareResponse = gattParser.parse(BATTERY_FIRMWARE_CHAR, batteryFirmware.read());
-                    System.out.println(String.format("Battery level: %s %%", batteryFirmwareResponse.get("Battery level").getInteger()));
-                    System.out.println("Firmware version: " + batteryFirmwareResponse.get("Firmware version").getString());
-                    GattResponse dataResponse = gattParser.parse(DATA_CHAR, data.read());
-                    System.out.println(String.format("Temperature: %.1f °C", dataResponse.get("Temperature").getDouble()));
-                    System.out.println(String.format("Sunlight: %d lux", dataResponse.get("Sunlight").getInteger()));
-                    System.out.println(String.format("Moisture: %d %%", dataResponse.get("Moisture").getInteger()));
-                    System.out.println(String.format("Fertility: %d µS/cm", dataResponse.get("Fertility").getInteger()));
-                    //Utils.printAvailableFields(bluetoothManager, gattParser, gattServices);
-                });
-        bluetoothManager.getDeviceGovernor(url).setConnectionControl(true);
-    }
+        bluetoothManager.getCharacteristicGovernor(url.copyWith(DATA_SERVICE, MAGIC_NUMBER_CHAR))
+                .whenReady(this::authenticate)
+                .thenAccept(authenticated -> {
+                    bluetoothManager.getCharacteristicGovernor(url.copyWith(DATA_SERVICE, BATTERY_FIRMWARE_CHAR))
+                            .whenReady(CharacteristicGovernor::read).thenAccept(this::printBatteryLevel);
 
-    private void run() throws InterruptedException {
-        Thread.currentThread().join();
+                    bluetoothManager.getCharacteristicGovernor(url.copyWith(DATA_SERVICE, DATA_CHAR))
+                            .whenReady(CharacteristicGovernor::read).thenAccept(this::printReadings);
+                }).get();
+        bluetoothManager.dispose();
     }
 
 }

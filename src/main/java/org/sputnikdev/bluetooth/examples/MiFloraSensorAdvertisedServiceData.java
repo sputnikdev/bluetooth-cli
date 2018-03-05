@@ -51,7 +51,7 @@ public final class MiFloraSensorAdvertisedServiceData {
         });
         bluetoothManager.getDeviceGovernor(url).addBluetoothSmartDeviceListener(new BluetoothSmartDeviceListener() {
             @Override
-            public void servicesResolved(List<GattService> gattServices) {  }
+            public void servicesResolved(List<GattService> gattServices) { }
 
             @Override
             public void serviceDataChanged(Map<URL, byte[]> serviceData) {

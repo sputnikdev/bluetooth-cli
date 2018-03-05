@@ -49,7 +49,7 @@ public final class MiTemperatureAndHumiditySensor {
      * An entry point for the application.
      * A single argument (device address) is required in the following format:
      * <br>/adapter address/device address
-     * <br>E.g.: /00:1A:7D:DA:71:05/00:1A:7D:DA:71:05
+     * <br>E.g.: /88:6B:0F:01:90:CA/4C:65:A8:D0:7A:EE
      * @param args a single argument in the following format: /XX:XX:XX:XX:XX:XX/YY:YY:YY:YY:YY:YY
      */
     public static void main(String[] args) throws InterruptedException {
@@ -81,12 +81,14 @@ public final class MiTemperatureAndHumiditySensor {
             @Override
             public void serviceDataChanged(Map<URL, byte[]> serviceData) {
                 serviceData.forEach((url, data) -> {
-                    GattResponse response = gattParser.parse(url.getServiceUUID(), data);
-                    response.getFieldHolders().stream()
-                            .filter(holder -> !holder.getField().isUnknown())
-                            .forEach(holder -> {
-                                System.out.println(holder.getField().getName() + ": " + holder);
-                            });
+                    if (gattParser.isValidForRead(url.getServiceUUID())) {
+                        GattResponse response = gattParser.parse(url.getServiceUUID(), data);
+                        response.getFieldHolders().stream()
+                                .filter(holder -> !holder.getField().isUnknown())
+                                .forEach(holder -> {
+                                    System.out.println(holder.getField().getName() + ": " + holder);
+                                });
+                    }
                 });
             }
 

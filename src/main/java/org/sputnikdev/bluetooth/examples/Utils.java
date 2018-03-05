@@ -36,11 +36,11 @@ final class Utils {
                         byte[] data = tryToRead(bluetoothManager.getCharacteristicGovernor(characteristic.getURL()));
                         gattParser.parse(characteristic.getURL().getCharacteristicUUID(), data).getFieldHolders().forEach(holder -> {
                             Field field = holder.getField();
-                            System.out.println(String.format("%s / %s (%s; %s): %s", serviceName, field.getName(),
-                                    field.getFormat().getName(), flags, holder.getString()));
+                            System.out.println(String.format("%-25s %-45s %-20s: %50s", serviceName, field.getName(),
+                                    field.getFormat().getName() + "; " + flags, holder.getString()));
                         });
                     } else {
-                        System.out.println(String.format("%s / %s (%s): %s", serviceName,
+                        System.out.println(String.format("%-25s %-45s %-20s: %50s", serviceName,
                                 characteristic.getURL().getCharacteristicUUID(),
                                 flags,
                                 formatHex(tryToRead(bluetoothManager.getCharacteristicGovernor(characteristic.getURL())))));
@@ -49,11 +49,11 @@ final class Utils {
                     if (knownCharacteristic) {
                         List<Field> fields = gattParser.getFields(characteristic.getURL().getCharacteristicUUID());
                         fields.forEach(field -> {
-                            System.out.println(String.format("%s / %s (%s; %s)", serviceName, field.getName(),
-                                    field.getFormat().getName(), flags));
+                            System.out.println(String.format("%-25s %-45s %-20s", serviceName, field.getName(),
+                                    field.getFormat().getName() + "; " + flags));
                         });
                     } else {
-                        System.out.println(String.format("%s / %s (%s)", serviceName, characteristicUID, flags));
+                        System.out.println(String.format("%-25s %-45s %-20s", serviceName, characteristicUID, flags));
                     }
                 }
 
