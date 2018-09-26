@@ -74,8 +74,8 @@ public class BluetoothManagerCli implements DeviceDiscoveryListener, AdapterDisc
     private BluetoothGovernor selected;
 
     public BluetoothManagerCli() {
-        registerTransports();
         bluetoothManager = new BluetoothManagerBuilder().build();
+        registerTransports();
         bluetoothManager.addDeviceDiscoveryListener(this);
         bluetoothManager.addAdapterDiscoveryListener(this);
         bluetoothManager.start(true);
